@@ -17,13 +17,13 @@ dataset_doi <- readLines(here::here("data/dataset_doi"))[1]
 
 ## Code you used to create dataset - LIST BELOW
 
-Ex: database_schema_name.database_table_name: file_name_that_created_this_table.R/RMD
+dc_health_behavior_diet.ncr_ct_fa_2010_2019_food_insecurity_and_cost: Food_Insecurity_Tract.RMD
 
 
 ```{r data}
 
 # Ex database_table_name: "va_hd_vdoe_2019_2021_3rd_grade_mean_median_read_score"
-table_names = c("ncr_ct_fa_2010_2019_food_insecurity_and_cost", "va_hd_fa_2010_2019_food_insecurity_and_cost") 
+table_names = c("ncr_ct_fa_2010_2019_food_insecurity_and_cost") 
     
 con <- get_db_conn()
 
@@ -44,7 +44,7 @@ if (length(table_names) > 1)
 
 DBI::dbDisconnect(con)
 
-all_geos_file_name <- "new_file_name"  #Ex: "va_vdoe_2019_2021_3rd_grade_mean_median_read_score"
+all_geos_file_name <- "ncr_ct_fa_2010_2019_food_insecurity_and_cost"  #Ex: "va_vdoe_2019_2021_3rd_grade_mean_median_read_score"
 assign(all_geos_file_name, all_geos_dat)
 ```
 
