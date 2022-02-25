@@ -1,0 +1,139 @@
+---
+title: "Food Insecurity at Tract Level 2"
+output: html_document
+---
+
+# load packages
+
+```{r}
+library(sf)
+library(tidyverse)
+library(tmap)
+library(tmaptools)
+library(tigris)
+library(tidycensus)
+library(rmapshaper)
+library(matrixStats)
+library(SpatialAcc)
+library(reticulate)
+library(dplyr)
+library(tidygeocoder)
+library(readxl)
+library(DBI)
+```
+
+
+# load and format Mapping Meal Gap Data
+
+```{r}
+mmg2019 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2021_2019Data_ToShare.xlsx", sheet = 2)
+mmg2019$Food_Insecurity_Rate <- mmg2019$`2019 Food Insecurity Rate`
+mmg2019$Child_Food_Insecurity_Rate <- mmg2019$`2019 Child food insecurity rate`
+# there was a methodological change in 2018, but I keep the data (not sure how they changed it and if they also changed 2019)
+mmg2018 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2020_2018Data_ToShare.xlsx", sheet = 1)
+mmg2018 <- mmg2018[2:nrow(mmg2018),]
+mmg2018$Food_Insecurity_Rate <- mmg2018$...4
+mmg2018$Child_Food_Insecurity_Rate <- mmg2018$...13
+mmg2018$FIPS <- mmg2018$`Data from MMG 2020 are NOT directly comparable to data from any prior MMG study due to methodological changes made in 2020.`
+mmg2017 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2019_2017Data_ToShare.xlsx", sheet = 1)
+mmg2017$Food_Insecurity_Rate <- mmg2017$`2017 Food Insecurity Rate`
+mmg2017$Child_Food_Insecurity_Rate <- mmg2017$`2017 Child food insecurity rate`
+mmg2016 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2018_2016Data_ToShare.xlsx", sheet = 1)
+mmg2016$Food_Insecurity_Rate <- mmg2016$`2016 Food Insecurity Rate`
+mmg2016$Child_Food_Insecurity_Rate <- mmg2016$`2016 Child food insecurity rate`
+mmg2015 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2017_2015Data_ToShare.xlsx", sheet = 1)
+mmg2015$Food_Insecurity_Rate <- mmg2015$`2015 Food Insecurity Rate`
+mmg2015$Child_Food_Insecurity_Rate <- mmg2015$`2015 Child food insecurity rate`
+mmg2014 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2016_2014Data_ToShare.xlsx", sheet = 1)
+mmg2014$Food_Insecurity_Rate <- mmg2014$`2014 Food Insecurity Rate`
+mmg2014$Child_Food_Insecurity_Rate <- mmg2014$`2014 Child food insecurity rate`
+mmg2013 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2015_2013Data_ToShare.xlsx", sheet = 2)
+mmg2013$Food_Insecurity_Rate <- mmg2013$`2013 Food Insecurity Rate`
+mmg2013$Child_Food_Insecurity_Rate <- mmg2013$`2013 Child food insecurity rate`
+mmg2012 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2014_2012Data_ToShare.xlsx", sheet = 2)
+mmg2012$Food_Insecurity_Rate <- mmg2012$`2012 Food Insecurity Rate`
+mmg2012$Child_Food_Insecurity_Rate <- mmg2012$`2012 Child food insecurity rate`
+# we dont have ACS variables needed for these years - not 100%
+mmg2011 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2013_2011Data_ToShare.xlsx", sheet = 2)
+mmg2011$Food_Insecurity_Rate <- mmg2011$`2011 Food Insecurity Rate`
+mmg2011$Child_Food_Insecurity_Rate <- mmg2011$`2011 Child Food Insecurity Rate`
+mmg2010 <- read_excel("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding_America/Map_the_Meal_Gap_Data/MMG2012_2010Data_ToShare.xlsx", sheet = 2)
+mmg2010$Food_Insecurity_Rate <- mmg2010$`Food Insecurity Rate`
+mmg2010$Child_Food_Insecurity_Rate <- mmg2010$`Child food insecurity rate`
+files <- list(mmg2019, mmg2018, mmg2017, mmg2016, mmg2015, mmg2014, mmg2013, mmg2012)
+```
+
+# format weighted annual food buget shortfall
+
+```{r}
+# Getting Weighted Annual Food Buget Shortfall
+mmg2019$weighted_budget_shortfall <- mmg2019$`2019 Weighted Annual Food Budget Shortfall`
+mmg2018$weighted_budget_shortfall <- mmg2018$...18
+mmg2017$weighted_budget_shortfall <- mmg2017$`2017 Weighted Annual Food Budget Shortfall`
+mmg2016$weighted_budget_shortfall <- mmg2016$`2016 Weighted Annual Food Budget Shortfall`
+mmg2015$weighted_budget_shortfall <- mmg2015$`2015 Weighted Annual Food Budget Shortfall`
+mmg2014$weighted_budget_shortfall <- mmg2014$`2014 Weighted Annual Food Budget Shortfall`
+mmg2013$weighted_budget_shortfall <- mmg2013$`2013 Weighted Annual Food Budget Shortfall`
+mmg2012$weighted_budget_shortfall <- mmg2012$`2012 Weighted Annual Food Budget Shortfall`
+mmg2011$weighted_budget_shortfall <- mmg2011$`Weighted Annual Food Budget Shortfall`
+
+# add year
+mmg2019$year <- 2019
+mmg2018$year <- 2018
+mmg2017$year <- 2017
+mmg2016$year <- 2016
+mmg2015$year <- 2015
+mmg2014$year <- 2014
+mmg2013$year <- 2013
+mmg2012$year <- 2012
+mmg2011$year <- 2011
+
+mmg_data <-
+  rbind(mmg2019 %>% select(FIPS, weighted_budget_shortfall, year), mmg2018 %>% select(FIPS, weighted_budget_shortfall, year),
+        mmg2017 %>% select(FIPS, weighted_budget_shortfall, year), mmg2016 %>% select(FIPS, weighted_budget_shortfall, year),
+        mmg2015 %>% select(FIPS, weighted_budget_shortfall, year), mmg2014 %>% select(FIPS, weighted_budget_shortfall, year),
+        mmg2013 %>% select(FIPS, weighted_budget_shortfall, year), mmg2012 %>% select(FIPS, weighted_budget_shortfall, year),
+        mmg2011 %>% select(FIPS, weighted_budget_shortfall, year)) %>%
+  rename(geoid = FIPS, value = weighted_budget_shortfall) %>%
+  mutate(measure = "weighted_budget_shortfall", region_type = "county", measure_type = "count", measure_units = "dollars")
+  
+idxs <- which(nchar(mmg_data$geoid) == 4)
+mmg_data$geoid[idxs] <- paste0(0, mmg_data$geoid[idxs])
+
+us.co <- get_acs(geography = "county",
+                 year = 2019,
+                 variables = c(in_labor_force = "B23025_002"),
+                 survey = "acs5",
+                 output = "wide",
+                 geometry = F)
+
+# merge data with US counties
+wbs_mmg_data <- full_join(mmg_data, us.co[, c("GEOID", "NAME")], by = c("geoid" = "GEOID")) %>%
+  rename(region_name = NAME) %>%
+  relocate("geoid", "region_type", "region_name", "year", "measure", "value", "measure_type", "measure_units") %>%
+  drop_na(year)
+
+# send to db
+# con <- get_db_conn(db_pass = "rsu8zvrsu8zv")
+# dc_dbWriteTable(con, "dc_health_behavior_diet", "reg_ct_fa_2011_2019_weighted_annual_food_budget_shortfall", wbs_mmg_data)
+# dbDisconnect(con)
+```
+
+
+# add subsetting of food buget shortfall
+
+```{r}
+con <- get_db_conn(db_pass = "rsu8zvrsu8zv")
+food_budget_shortfall <- st_read(con, query = "SELECT * FROM dc_health_behavior_diet.reg_ct_fa_2011_2019_weighted_annual_food_budget_shortfall")
+dbDisconnect(con)
+
+va_food_budget_shortfall <- food_budget_shortfall[substr(food_budget_shortfall$geoid, 1, 2) == "51",]
+ncr_food_budget_shortfall <- food_budget_shortfall[food_budget_shortfall$geoid %in% c("51013", "51059", "51107", "51510", "51600", "51153", "51683", "51685", "51610", "11001", "24031", "24033", "24017", "24021"),]
+
+# send to db
+# con <- get_db_conn(db_pass = "rsu8zvrsu8zv")
+# dc_dbWriteTable(con, "dc_health_behavior_diet", "va_ct_fa_2011_2019_weighted_annual_food_budget_shortfall", va_food_budget_shortfall)
+# dc_dbWriteTable(con, "dc_health_behavior_diet", "ncr_ct_fa_2011_2019_weighted_annual_food_budget_shortfall", ncr_food_budget_shortfall)
+# dbDisconnect(con)
+```
+

@@ -17,7 +17,7 @@ dataset_doi <- readLines(here::here("data/dataset_doi"))[1]
 
 ## Code you used to create dataset - LIST BELOW
 
-dc_health_behavior_diet.ncr_ct_fa_2011_2019_weighted_annual_food_budget_shortfall: Food Insecurity 2.RMD
+dc_health_behavior_diet.ncr_ct_fa_2011_2019_weighted_annual_food_budget_shortfall: food_budget_shortfall.RMD
 # do we have any more granularity here?
 
 

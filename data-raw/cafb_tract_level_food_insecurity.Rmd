@@ -3,6 +3,8 @@ title: "Untitled"
 output: html_document
 ---
 
+### GET CAFB tract estimates for entire NCR (originally missing 3 counties and a few random tracts)
+
 # imports
 
 ```{r}
@@ -45,11 +47,13 @@ cafb3 <- st_as_sf(cafb2) %>%
   rename(GEOID = GEOID10)
 
 cafb_tr_data <- st_drop_geometry(cafb3) %>% mutate(F15_FI_RATE = F15_FI_RATE * 100) %>%
-  gather(measure, value, c(F15_FI_RATE, F15_FI_POP, F15_LB_NEED, F15_LB_UNME, F15_DISTRIB, F14_FI_RATE, F14_LB_UNME, F14_DISTRIB)) %>% # what is PPIN???
+  gather(measure, value, c(F15_FI_RATE, F15_FI_POP, F15_LB_NEED, F15_LB_UNME,
+                           F15_DISTRIB, F14_FI_RATE, F14_LB_UNME, F14_DISTRIB)) %>% # what is PPIN???
   rename(geoid = GEOID, region_name = NAME) %>%
   select(-c(F15_PPIN, F14_PPIN)) %>%
-  mutate(measure_type = ifelse(measure %in% c("F15_FI_RATE", "F14_FI_RATE"), "percent",
-                               ifelse(measure %in% c("F15_FI_POP"), "population", "weight")),
+  mutate(measure_type = case_when(measure %in% c("F15_FI_RATE", "F14_FI_RATE") ~ "percent",
+                                  measure %in% c("F15_FI_POP") ~ "population",
+                                  TRUE ~ "weight"),
          measure_units = ifelse(measure %in% c("F15_FI_RATE", "F14_FI_RATE", "F15_FI_POP"), as.character(NA), "lbs"),
          year = ifelse(measure %in% c("F14_FI_RATE", "F14_LB_UNME", "F14_DISTRIB"), "2014", "2015"),
          region_type = "tract") %>%
@@ -70,7 +74,9 @@ X <- read.csv("/project/biocomplexity/sdad/projects_data/mc/data_commons/Feeding
 X2 <- X %>%
   rename(geoid = GEOID10) %>%
   mutate(geoid = as.character(geoid)) %>%
-  select(geoid, FIPOP_2019, FIPOP_Per_2019, FIPOP_2020, FIPOP_Per_2020, FIPOP_2021, FIPOP_Per_2021, F2021_FI_Pop_Percentile)
+  select(geoid, FIPOP_2019, FIPOP_Per_2019, FIPOP_2020, FIPOP_Per_2020, FIPOP_2021, FIPOP_Per_2021, F2021_FI_Pop_Percentile) %>%
+  merge(dmv.tr.utm[, c("NAME", "GEOID")], by.x = "geoid", by.y = "GEOID")
+cafb.19.21 <- X2
 
 cafb.19.21 <- merge(cafb4[, c("GEOID", "NAME")], X2, by.x = "GEOID", by.y = "geoid")
 
@@ -323,35 +329,10 @@ subset2 <- cap_tract_data %>%
   relocate("geoid", "region_type", "region_name", "year", "measure", "value", "measure_type", "measure_units")
 
 dat.2021 <- rbind(subset1, subset2)
-```
-
-
-
-```{r}
 all.dat <- rbind(dat.2019, dat.2021, dat.2021)
-# merge(all.dat, dmv.tr, by.x = "geoid", by.y = "GEOID") %>% filter(year == 2019)
-# 
-# tm_shape(left_join(dmv.tr, all.dat, by = c("GEOID" = "geoid")) %>% filter(year == 2019), unit = "mi") +
-#   tm_polygons(col = "value",
-#               style = "fixed",
-#               palette = "Blues",
-#               border.alpha = 0,
-#               title = "Percent (%)",
-#               breaks = c(0, 5, 10, 20, 30, 50),
-#               colorNA = "white",
-#               textNA = "Missing",
-#               showNA = TRUE) +
-#   tm_scale_bar(position = c("left", "top")) +
-#   tm_shape(cap_ct2) +
-#   tm_polygons(alpha = 0) +
-#   tm_layout(main.title = "2015 CAFB Food Insecurity Estimates",
-#             main.title.size = 0.95,
-#             frame = F,
-#             legend.outside = T,
-#             legend.outside.position = "right")
 ```
 
-
+# send to db
 
 ```{r}
 con <- get_db_conn(db_pass = "rsu8zvrsu8zv")
