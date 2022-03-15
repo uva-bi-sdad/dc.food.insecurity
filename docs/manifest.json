@@ -1,0 +1,79 @@
+{
+  "name": "dc.food.insecurity",
+  "data": [
+    {
+      "name": "food_insecurity_and_cost",
+      "variables": ["Child_Food_Insecurity_Rate", "Food_Insecurity_Rate", "Num_Child_Food_Insecure", "Num_Food_Insecure", "Cost_Per_Meal"],
+      "file": "ncr_ct_fa_2010_2019_food_insecurity_and_cost.csv.xz",
+      "size": 3984,
+      "md5": "bdde0e91300ea7694682c1b051943a08"
+    },
+    {
+      "name": "weighted_annual_food_budget_shortfall",
+      "variables": "weighted_budget_shortfall",
+      "file": "ncr_ct_fa_2011_2019_weighted_annual_food_budget_shortfall.csv.xz",
+      "size": 824,
+      "md5": "c7863f1aa1534031d80f98076c33a2a9"
+    },
+    {
+      "name": "food_insecurity_estimates",
+      "variables": "perc_food_insecure",
+      "file": "ncr_tr_cafb_2019_2021_food_insecurity_estimates.csv.xz",
+      "size": 15704,
+      "md5": "f8ce0b94caf93842f9b93400f4a232aa"
+    },
+    {
+      "name": "weighted_annual_food_budget_shortfall",
+      "variables": "weighted_budget_shortfall",
+      "file": "va_ct_fa_2011_2019_weighted_annual_food_budget_shortfall.csv.xz",
+      "size": 4248,
+      "md5": "3d5cd9b3ba83b00fe4957e82f7bd20ae"
+    },
+    {
+      "name": "food_insecurity_and_cost",
+      "variables": ["Num_Food_Insecure", "Num_Child_Food_Insecure", "Food_Insecurity_Rate", "Child_Food_Insecurity_Rate", "Cost_Per_Meal"],
+      "file": "va_hdct_fa_2010_2019_food_insecurity_and_cost.csv.xz",
+      "size": 11992,
+      "md5": "94f3cba884057acc9d6a0f77e411bf24"
+    }
+  ],
+  "distributions": {
+    "dataverse": {
+      "id": 55899,
+      "doi": "doi:10.18130/V3/HODJUO",
+      "server": "https://dataverse.lib.virginia.edu/",
+      "data": [
+        {
+          "file": "ncr_ct_fa_2010_2019_food_insecurity_and_cost.csv.xz",
+          "id": 55917,
+          "size": 3984,
+          "md5": "bdde0e91300ea7694682c1b051943a08"
+        },
+        {
+          "file": "ncr_ct_fa_2011_2019_weighted_annual_food_budget_shortfall.csv.xz",
+          "id": 55919,
+          "size": 824,
+          "md5": "c7863f1aa1534031d80f98076c33a2a9"
+        },
+        {
+          "file": "ncr_tr_cafb_2019_2021_food_insecurity_estimates.csv.xz",
+          "id": 55912,
+          "size": 15704,
+          "md5": "f8ce0b94caf93842f9b93400f4a232aa"
+        },
+        {
+          "file": "va_ct_fa_2011_2019_weighted_annual_food_budget_shortfall.csv.xz",
+          "id": 55918,
+          "size": 4248,
+          "md5": "3d5cd9b3ba83b00fe4957e82f7bd20ae"
+        },
+        {
+          "file": "va_hdct_fa_2010_2019_food_insecurity_and_cost.csv.xz",
+          "id": 55962,
+          "size": 11992,
+          "md5": "94f3cba884057acc9d6a0f77e411bf24"
+        }
+      ]
+    }
+  }
+}
